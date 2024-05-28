@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_community.llms import Ollama
@@ -26,6 +26,13 @@ class Prompt(BaseModel):
 async def generate(prompt: Prompt):
     response = llm.invoke(prompt.prompt)
     return {"response": response}
+
+# Define a route to handle PDF file uploads
+@app.post("/upload-pdf")
+async def upload_pdf(pdf: UploadFile = File(...)):
+    # Here, you can handle the uploaded PDF file
+    # For now, let's just return a success message
+    return {"message": "File uploaded successfully"}
 
 if __name__ == "__main__":
     import uvicorn
