@@ -22,15 +22,15 @@ This project is a French Story Game Generator, consisting of a backend API power
 ## Installation
 
 ### Backend
-git clone https://github.com/MythicMeld/Game-Chatbot.git
-cd Game-Chatbot/server
-uvicorn main:app --reload
+- git clone https://github.com/MythicMeld/Game-Chatbot.git
+- cd Game-Chatbot/server
+- uvicorn main:app --reload
 
 ### Frontend 
-cd Game-Chatbot/chatbot
-npm install
-npm run dev
+- cd Game-Chatbot/chatbot
+- npm install
+- npm run dev
 
 ### Running the Model
-ollama serve
+- ollama serve
 
