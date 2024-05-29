@@ -1,4 +1,4 @@
-import{ useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import './Chat.css';
 
@@ -6,62 +6,73 @@ function Chat() {
   const [userInput, setUserInput] = useState('');
   const [chatLog, setChatLog] = useState([{ sender: 'Bot', message: "I'm an AI" }]);
   const [loading, setLoading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null); // State for selected file
   const chatContainerRef = useRef(null);
+  const pdfUploadedRef = useRef(false); // Ref to track if a PDF has been uploaded
 
   useEffect(() => {
-    // Auto-scroll to bottom on chat update
     chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
   }, [chatLog]);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file);
-  };
-
   const handleSubmit = async () => {
-    if (userInput.trim() === '' && !selectedFile) return;
+    if (userInput.trim() === '') return;
 
-    setLoading(true); // Show loader
+    setLoading(true);
 
     try {
-      if (userInput.trim() !== '') {
-        const updatedChatLog = [...chatLog, { sender: 'User', message: userInput }];
-        setChatLog(updatedChatLog);
+      const updatedChatLog = [...chatLog, { sender: 'User', message: userInput }];
+      setChatLog(updatedChatLog);
 
-        const response = await axios.post('http://localhost:8000/generate', {
-          prompt: userInput,
-        });
+      const endpoint = pdfUploadedRef.current ? 'http://localhost:8000/ask_pdf' : 'http://localhost:8000/ai';
+      
+      const response = await axios.post(endpoint, {
+        query: userInput,
+      });
 
-        setChatLog([...updatedChatLog, { sender: 'Bot', message: response.data.response }]);
-      } else if (selectedFile) {
-        // Handle file upload
-        const formData = new FormData();
-        formData.append('pdf', selectedFile);
-
-        // You can adjust the endpoint URL as needed
-        const response = await axios.post('http://localhost:8000/upload-pdf', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-
-        // Handle the response from the server
-        console.log('File uploaded:', response.data);
-      }
+      setChatLog([...updatedChatLog, { sender: 'Bot', message: response.data.answer }]);
     } catch (error) {
       console.error('Error:', error);
     } finally {
-      setLoading(false); // Hide loader
-      setUserInput(''); // Clear message field
-      setSelectedFile(null); // Clear selected file
+      setLoading(false);
+      setUserInput('');
     }
+  }
+
+  const handleUpload = async (file) => {
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const fileName = file.name;
+      setChatLog(prevLog => [...prevLog, { sender: 'User', message: fileName }]);
+      
+      const response = await axios.post('http://localhost:8000/pdf', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      setChatLog(prevLog => [...prevLog, { sender: 'Bot', message: response.data.status }]);
+      pdfUploadedRef.current = true; // Set flag indicating a PDF has been uploaded
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNewChat = () => {
+    setUserInput('');
+    setChatLog([{ sender: 'Bot', message: "I'm an AI" }]);
+    setLoading(false);
+    pdfUploadedRef.current = false; // Reset the PDF upload flag
   };
 
   return (
     <div className="App">
       <aside className="sidemenu">
-        <div className="side-menu-button">
+        <div className="side-menu-button" onClick={handleNewChat}>
           <span>+</span>
           New Chat
         </div>
@@ -97,9 +108,14 @@ function Chat() {
               }
             }}
           />
-          <input type="file" onChange={handleFileChange} accept="application/pdf" /> {/* File input field */}
           <button className="side-menu-button" onClick={handleSubmit}>
-            { loading ? 'Sending...' : 'Send'}
+            {loading ? 'Sending...' : 'Send'}
+          </button>
+        </div>
+        <div className="upload-holder">
+          <input type="file" onChange={(e) => handleUpload(e.target.files[0])} />
+          <button className="upload-button" onClick={() => handleUpload()}>
+            Upload
           </button>
         </div>
       </section>
