@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This project is a French Story Game Generator, consisting of a backend API powered by FastAPI, a frontend application built with Vite React, and a language model named Phi-3 executed using Ollama. The backend generates French stories based on user inputs and provides these stories to the frontend for display and interaction.
+This project is a French Story Game Generator, consisting of a backend API powered by FastAPI, a frontend application built with Vite and React, and a language model named Phi-3 executed using Ollama. The backend generates French stories based on user inputs and provides these stories to the frontend for display and interaction. The project also utilizes Retrieval-Augmented Generation (RAG) and LangChain for intelligent querying and a vector database, ChromaDB, for storing embedded vectors. Additionally, users can upload PDF files and ask questions within the content of those PDFs.
 
 ## Requirements
 
@@ -18,6 +18,11 @@ This project is a French Story Game Generator, consisting of a backend API power
 ### Model
 - Phi-3
 - Ollama 
+
+### Additional Tools
+- RAG
+- LangChain
+- ChromaDB
   
 ## Installation
 
